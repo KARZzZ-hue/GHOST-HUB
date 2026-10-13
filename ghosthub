@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GHOST HUB</title>
+<style>
+  :root { --red: #b0001a; --bright: #ff1a2e; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: #050000; color: #fff; font-family: "Courier New", monospace; overflow: hidden; }
+  .screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; transition: opacity .8s, transform .8s; }
+  .hidden { opacity: 0; transform: scale(1.15); pointer-events: none; }
+
+  /* Loading screen */
+  #loading { background: radial-gradient(circle at 50% 40%, #2a0005, #000 70%); flex-direction: column; }
+  .ghost-spin { position: absolute; width: 220px; height: 220px; font-size: 180px; line-height: 220px; text-align: center;
+    opacity: .18; animation: spin 6s linear infinite; filter: drop-shadow(0 0 20px var(--red)); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .title { position: relative; font-size: 48px; letter-spacing: 8px; color: var(--bright); text-shadow: 0 0 18px var(--red); min-height: 56px; }
+  .sub { position: relative; margin-top: 14px; font-size: 18px; color: #ccc; min-height: 24px; }
+  .cursor::after { content: "|"; animation: blink .7s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* Shine sweep */
+  .shine::before { content: ""; position: absolute; top: 0; left: -75%; width: 50%; height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,.35), transparent); animation: sweep 2.4s infinite; }
+  @keyframes sweep { to { left: 125%; } }
+
+  /* Blood drips */
+  .drips { position: absolute; top: 0; left: 0; right: 0; height: 90px; pointer-events: none; }
+  .drip { position: absolute; top: 0; width: 8px; border-radius: 0 0 8px 8px; background: linear-gradient(var(--red), #600); animation: drip 4s ease-in infinite; }
+  @keyframes drip { 0% { height: 0; } 60% { height: 70px; } 100% { height: 70px; opacity: 0; } }
+
+  /* Knives */
+  .knife { position: absolute; bottom: 12%; width: 120px; height: 14px; background: linear-gradient(#ddd, #777); border-radius: 0 6px 6px 0; opacity: .5; }
+  .knife::before { content: ""; position: absolute; left: -26px; top: -6px; width: 30px; height: 26px; background: #222; border-radius: 6px; }
+  .knife.l { left: 6%; transform: rotate(-35deg); }
+  .knife.r { right: 6%; transform: rotate(35deg) scaleX(-1); }
+
+  /* Home */
+  #home { background: #050000; flex-direction: column; gap: 18px; }
+  #home h1 { color: var(--bright); letter-spacing: 6px; text-shadow: 0 0 14px var(--red); }
+  #home p { color: #888; }
+</style>
+</head>
+<body>
+
+<div id="loading" class="screen">
+  <div class="drips" id="drips"></div>
+  <div class="knife l"></div>
+  <div class="knife r"></div>
+  <div class="ghost-spin">👻</div>
+  <div class="title shine" id="title"></div>
+  <div class="sub cursor" id="sub"></div>
+</div>
+
+<div id="home" class="screen hidden">
+  <h1>GHOST HUB</h1>
+  <p>Ready.</p>
+</div>
+
+<script>
+  // Blood drips across the top
+  const drips = document.getElementById('drips');
+  for (let i = 0; i < 14; i++) {
+    const d = document.createElement('div');
+    d.className = 'drip';
+    d.style.left = (Math.random() * 98) + '%';
+    d.style.animationDelay = (Math.random() * 4) + 's';
+    d.style.animationDuration = (3 + Math.random() * 3) + 's';
+    drips.appendChild(d);
+  }
+
+  // Typewriter helper
+  const type = (el, text, speed) => new Promise(res => {
+    let i = 0;
+    const t = setInterval(() => {
+      el.textContent += text[i++];
+      if (i >= text.length) { clearInterval(t); res(); }
+    }, speed);
+  });
+
+  (async () => {
+    await type(document.getElementById('title'), 'GHOST', 150);
+    document.getElementById('title').classList.remove('shine');
+    await type(document.getElementById('sub'), 'loading...', 90);
+    // Total load time ~4s, then transition out
+    setTimeout(() => {
+      document.getElementById('loading').classList.add('hidden');
+      document.getElementById('home').classList.remove('hidden');
+    }, 4000);
+  })();
+</script>
+</body>
+</html>
